@@ -1,0 +1,518 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>КопиМотик — техническое описание</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Spectral:wght@500;600;700&family=Manrope:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap');
+
+:root{
+  --paper:#f5f1e8;
+  --paper-2:#efe9da;
+  --card:#fffdf8;
+  --ink:#1b211c;
+  --ink-soft:#4b554c;
+  --ink-faint:#7a857b;
+  --line:#ddd5c4;
+  --green:#1f6e43;
+  --green-bright:#2fa86a;
+  --green-wash:#e7f1e9;
+  --amber:#9a6a14;
+  --amber-wash:#f6edd9;
+  --shadow:0 1px 2px rgba(27,33,28,.05), 0 8px 30px rgba(27,33,28,.06);
+  --rail:300px;
+}
+
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--paper); color:var(--ink);
+  font-family:"Manrope", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size:16px; line-height:1.65; -webkit-font-smoothing:antialiased;
+  background-image:radial-gradient(var(--line) .6px, transparent .6px);
+  background-size:22px 22px;
+}
+a{color:var(--green); text-decoration:none}
+a:hover{text-decoration:underline}
+
+/* ---------- layout ---------- */
+.wrap{max-width:1180px; margin:0 auto; padding:0 24px}
+.shell{display:grid; grid-template-columns:var(--rail) 1fr; gap:40px; align-items:start}
+
+/* ---------- header ---------- */
+header.hero{
+  border-bottom:1px solid var(--line); background:linear-gradient(180deg,var(--paper-2),var(--paper));
+}
+.hero-inner{padding:38px 0 30px}
+.kicker{
+  font-family:"JetBrains Mono",monospace; font-size:12px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--green); margin:0 0 12px; display:flex; align-items:center; gap:10px;
+}
+.kicker .dot{width:7px;height:7px;border-radius:50%;background:var(--green-bright);box-shadow:0 0 0 4px var(--green-wash)}
+h1.title{
+  font-family:"Spectral",serif; font-weight:700; font-size:clamp(30px,5vw,50px); line-height:1.05;
+  margin:0 0 14px; letter-spacing:-.01em;
+}
+h1.title em{color:var(--green); font-style:normal}
+.lede{font-size:clamp(16px,2.2vw,19px); color:var(--ink-soft); max-width:62ch; margin:0 0 20px}
+.badges{display:flex; flex-wrap:wrap; gap:8px}
+.badge{
+  font-family:"JetBrains Mono",monospace; font-size:12.5px; color:var(--ink);
+  background:var(--card); border:1px solid var(--line); border-radius:999px; padding:5px 12px;
+}
+.badge b{color:var(--green); font-weight:700}
+
+/* ---------- TOC rail ---------- */
+nav.rail{
+  position:sticky; top:18px; align-self:start; max-height:calc(100vh - 36px);
+  overflow:auto; padding:18px 16px 24px; background:var(--card);
+  border:1px solid var(--line); border-radius:16px; box-shadow:var(--shadow);
+}
+.rail h2{
+  font-family:"JetBrains Mono",monospace; font-size:11px; letter-spacing:.16em; text-transform:uppercase;
+  color:var(--ink-faint); margin:4px 8px 12px;
+}
+.search{position:relative; margin:0 6px 14px}
+.search input{
+  width:100%; padding:9px 12px 9px 32px; border:1px solid var(--line); border-radius:10px;
+  background:var(--paper); color:var(--ink); font:inherit; font-size:14px;
+}
+.search input:focus{outline:none; border-color:var(--green-bright); box-shadow:0 0 0 3px var(--green-wash)}
+.search svg{position:absolute; left:10px; top:50%; transform:translateY(-50%); width:15px; height:15px; stroke:var(--ink-faint)}
+.toc{list-style:none; margin:0; padding:0; counter-reset:toc}
+.toc li{margin:1px 0}
+.toc a{
+  display:flex; gap:10px; align-items:baseline; padding:7px 10px; border-radius:9px;
+  color:var(--ink-soft); font-size:14px; line-height:1.35;
+}
+.toc a .num{
+  font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--green);
+  min-width:20px; text-align:right; font-weight:500;
+}
+.toc a:hover{background:var(--paper); text-decoration:none; color:var(--ink)}
+.toc a.active{background:var(--green-wash); color:var(--green); font-weight:600}
+.toc a.active .num{color:var(--green)}
+.toc li.hide{display:none}
+
+/* ---------- content ---------- */
+main{min-width:0; padding:34px 0 90px}
+
+.faq{
+  background:var(--card); border:1px solid var(--line); border-radius:16px; padding:20px 22px;
+  box-shadow:var(--shadow); margin:0 0 38px;
+}
+.faq h2{font-family:"Spectral",serif; font-size:20px; margin:0 0 4px}
+.faq p.sub{margin:0 0 16px; color:var(--ink-faint); font-size:14px}
+.faq-grid{display:grid; grid-template-columns:repeat(2,1fr); gap:8px}
+.faq-grid a{
+  display:flex; justify-content:space-between; align-items:center; gap:12px;
+  padding:11px 14px; border:1px solid var(--line); border-radius:11px; background:var(--paper);
+  color:var(--ink); font-size:14.5px; transition:border-color .15s, transform .15s;
+}
+.faq-grid a:hover{text-decoration:none; border-color:var(--green-bright); transform:translateX(2px)}
+.faq-grid a .to{font-family:"JetBrains Mono",monospace; font-size:11.5px; color:var(--green); white-space:nowrap}
+
+section.sec{
+  scroll-margin-top:18px; background:var(--card); border:1px solid var(--line); border-radius:16px;
+  padding:26px 30px; margin:0 0 18px; box-shadow:var(--shadow);
+}
+section.sec.dim{display:none}
+.sec-head{display:flex; align-items:baseline; gap:14px; margin:0 0 6px}
+.sec-num{
+  font-family:"JetBrains Mono",monospace; font-weight:700; font-size:14px; color:#fff;
+  background:var(--green); border-radius:8px; padding:3px 9px; line-height:1.4; flex:none;
+}
+.sec h2{font-family:"Spectral",serif; font-weight:700; font-size:clamp(20px,2.6vw,26px); margin:0; letter-spacing:-.01em}
+.sec h3{font-family:"Manrope"; font-weight:700; font-size:16px; margin:22px 0 6px; color:var(--ink)}
+.sec p{margin:10px 0; color:var(--ink-soft)}
+.sec strong{color:var(--ink)}
+.sec ul{margin:10px 0; padding-left:0; list-style:none}
+.sec ul li{position:relative; padding-left:22px; margin:7px 0; color:var(--ink-soft)}
+.sec ul li::before{content:""; position:absolute; left:4px; top:11px; width:6px; height:6px; border-radius:50%; background:var(--green-bright)}
+.sec ol{margin:10px 0; padding-left:22px}
+.sec ol li{margin:7px 0; color:var(--ink-soft)}
+code{
+  font-family:"JetBrains Mono",monospace; font-size:.88em; background:var(--amber-wash);
+  color:var(--amber); padding:1.5px 6px; border-radius:6px; border:1px solid #ecdfc4;
+}
+pre{
+  font-family:"JetBrains Mono",monospace; font-size:13px; line-height:1.55; color:#e8efe8;
+  background:#1c241e; border-radius:12px; padding:16px 18px; overflow:auto; margin:14px 0;
+  border:1px solid #2b342c;
+}
+pre code{background:none; color:inherit; padding:0; border:none; font-size:inherit}
+.callout{
+  border-left:3px solid var(--green-bright); background:var(--green-wash);
+  padding:12px 16px; border-radius:0 10px 10px 0; margin:14px 0; color:var(--ink);
+}
+.callout.warn{border-left-color:var(--amber); background:var(--amber-wash)}
+.callout b{color:var(--ink)}
+.kv{width:100%; border-collapse:collapse; margin:12px 0; font-size:14px}
+.kv td{border-bottom:1px solid var(--line); padding:9px 10px; vertical-align:top; color:var(--ink-soft)}
+.kv tr:last-child td{border-bottom:none}
+.kv td:first-child{
+  font-family:"JetBrains Mono",monospace; color:var(--green); width:1%; white-space:nowrap; font-size:13px; font-weight:500;
+}
+.totop{
+  display:inline-flex; align-items:center; gap:6px; margin-top:14px;
+  font-family:"JetBrains Mono",monospace; font-size:11.5px; letter-spacing:.06em; color:var(--ink-faint);
+}
+.totop:hover{color:var(--green); text-decoration:none}
+
+footer{border-top:1px solid var(--line); color:var(--ink-faint); font-size:13px; padding:24px 0 60px}
+footer .wrap{display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px}
+.mono{font-family:"JetBrains Mono",monospace}
+
+/* mobile TOC toggle */
+.toc-toggle{display:none}
+
+@media (max-width:880px){
+  .shell{grid-template-columns:1fr; gap:0}
+  nav.rail{
+    position:static; max-height:none; margin:0 0 18px;
+    display:none;
+  }
+  nav.rail.open{display:block}
+  .toc-toggle{
+    display:flex; align-items:center; gap:8px; width:100%; justify-content:center;
+    margin:18px 0 0; padding:12px; border:1px solid var(--line); border-radius:12px;
+    background:var(--card); color:var(--green); font-family:"JetBrains Mono",monospace;
+    font-size:13px; letter-spacing:.08em; cursor:pointer;
+  }
+  .faq-grid{grid-template-columns:1fr}
+  section.sec{padding:22px 18px}
+  main{padding-top:8px}
+}
+</style>
+</head>
+<body>
+
+<header class="hero" id="top">
+  <div class="wrap hero-inner">
+    <p class="kicker"><span class="dot"></span> Техническое описание · для тех-специалиста</p>
+    <h1 class="title">КопиМотик — <em>как устроено приложение</em></h1>
+    <p class="lede">Финансовый ассистент с маскотом-бегемотиком. Ниже — полная разборка по пунктам: стек, архитектура, хранилище, бэкенд, схема БД, алгоритм индекса, AI-коуч и безопасность. Слева — навигация, ниже — быстрые ответы на вероятные вопросы.</p>
+    <div class="badges">
+      <span class="badge"><b>React</b> 18.3.1</span>
+      <span class="badge"><b>Node.js</b> ≥ 22.5</span>
+      <span class="badge"><b>SQLite</b> node:sqlite</span>
+      <span class="badge">Vanilla JS</span>
+      <span class="badge">SVG</span>
+      <span class="badge">Anthropic API</span>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <button class="toc-toggle" id="tocToggle">☰ ОГЛАВЛЕНИЕ</button>
+  <div class="shell">
+
+    <!-- ===================== TOC RAIL ===================== -->
+    <nav class="rail" id="rail">
+      <h2>Содержание</h2>
+      <div class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.5" y2="16.5"/></svg>
+        <input type="text" id="tocSearch" placeholder="Поиск по разделам…" autocomplete="off">
+      </div>
+      <ul class="toc" id="toc">
+        <li><a href="#s1"><span class="num">01</span><span>Что это и общая архитектура</span></a></li>
+        <li><a href="#s2"><span class="num">02</span><span>Технологический стек</span></a></li>
+        <li><a href="#s3"><span class="num">03</span><span>Состав index.html (скрипт-блоки)</span></a></li>
+        <li><a href="#s4"><span class="num">04</span><span>Слой хранения window.storage</span></a></li>
+        <li><a href="#s5"><span class="num">05</span><span>Бэкенд server.js</span></a></li>
+        <li><a href="#s6"><span class="num">06</span><span>db_adapter.js — мост состояние↔SQL</span></a></li>
+        <li><a href="#s7"><span class="num">07</span><span>Схема базы данных</span></a></li>
+        <li><a href="#s8"><span class="num">08</span><span>Модель мультиюзера</span></a></li>
+        <li><a href="#s9"><span class="num">09</span><span>Плагины и ре-рендеры React</span></a></li>
+        <li><a href="#s10"><span class="num">10</span><span>Финансовый индекс (алгоритм)</span></a></li>
+        <li><a href="#s11"><span class="num">11</span><span>AI-коуч и фолбэк</span></a></li>
+        <li><a href="#s12"><span class="num">12</span><span>Три HTML-сборки</span></a></li>
+        <li><a href="#s13"><span class="num">13</span><span>Зависимости и требования</span></a></li>
+        <li><a href="#s14"><span class="num">14</span><span>Безопасность</span></a></li>
+        <li><a href="#s15"><span class="num">15</span><span>Состав архива</span></a></li>
+        <li><a href="#s16"><span class="num">16</span><span>Исправленный баг</span></a></li>
+      </ul>
+    </nav>
+
+    <!-- ===================== CONTENT ===================== -->
+    <main>
+
+      <!-- FAQ quick-jump -->
+      <div class="faq">
+        <h2>Вопрос тех-специалиста → раздел</h2>
+        <p class="sub">Кликабельные ярлыки: сразу переходят к нужному ответу.</p>
+        <div class="faq-grid">
+          <a href="#s2">На чём написано? <span class="to">→ 02</span></a>
+          <a href="#s13">Какие зависимости нужны? <span class="to">→ 13</span></a>
+          <a href="#s1">Нужен ли сервер, можно как статику? <span class="to">→ 01 · 12 · 13</span></a>
+          <a href="#s4">Где и как хранятся данные? <span class="to">→ 04 · 07</span></a>
+          <a href="#s8">Как устроен мультиюзер? <span class="to">→ 08</span></a>
+          <a href="#s11">Используется ли ИИ, где API-ключ? <span class="to">→ 11</span></a>
+          <a href="#s14">Безопасно ли открывать в интернет? <span class="to">→ 14</span></a>
+          <a href="#s10">Как считается финансовый индекс? <span class="to">→ 10</span></a>
+          <a href="#s5">Какой у бэкенда API? <span class="to">→ 05</span></a>
+          <a href="#s9">Что за плагины и зачем? <span class="to">→ 03 · 09</span></a>
+          <a href="#s12">Чем отличаются три HTML-файла? <span class="to">→ 12</span></a>
+          <a href="#s16">Какой баг исправляли? <span class="to">→ 16</span></a>
+        </div>
+      </div>
+
+      <!-- 1 -->
+      <section class="sec" id="s1">
+        <div class="sec-head"><span class="sec-num">01</span><h2>Что это и общая архитектура</h2></div>
+        <p>КопиМотик — клиентское одностраничное приложение (SPA) на React, упакованное в <strong>один самодостаточный HTML-файл</strong>. Приложение рендерится в <code>&lt;div id="root"&gt;</code> через <code>ReactDOM.createRoot</code>. Поверх готового React-бандла работает слой автономных плагинов-надстроек: они не трогают бандл, а читают и пишут данные через единый интерфейс хранилища <code>window.storage</code>.</p>
+        <p>Архитектура <strong>двухрежимная</strong> — одна и та же кодовая база работает либо целиком в браузере, либо с бэкендом:</p>
+        <pre><code>        ┌──────────── Браузер (React SPA + плагины) ────────────┐
+        │   window.storage.get / set / delete / list            │
+        └───────────────┬───────────────────────┬───────────────┘
+                        │                        │
+          режим A: localStorage      режим B: REST → Node (server.js)
+          (статика, без сервера)     /api/kv → db_adapter.js → SQLite</code></pre>
+        <p>Ключевая инженерная идея: <strong>хранилище абстрагировано за <code>window.storage</code></strong>, поэтому фронтенд не знает, лежат данные в localStorage или в SQLite на сервере — реализацию подменяет один из скрипт-шимов.</p>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 2 -->
+      <section class="sec" id="s2">
+        <div class="sec-head"><span class="sec-num">02</span><h2>Технологический стек</h2></div>
+        <ul>
+          <li><strong>React 18.3.1</strong> + ReactDOM (<code>createRoot</code>)</li>
+          <li><strong>Vanilla JavaScript</strong> — плагины-надстройки и шимы хранилища</li>
+          <li><strong>Node.js ≥ 22.5</strong> — бэкенд <code>server.js</code> на встроенном <code>node:http</code></li>
+          <li><strong>SQLite</strong> через встроенный <code>node:sqlite</code> (<code>DatabaseSync</code>), опционально <code>better-sqlite3</code></li>
+          <li><strong>SQL</strong> — схема <code>schema.sql</code></li>
+          <li><strong>SVG</strong> — вся графика (маскот, шкалы, косметика) рисуется вручную, без графических библиотек</li>
+          <li><strong>Anthropic Messages API</strong> (<code>claude-sonnet-4-20250514</code>) — AI-коуч, с локальным фолбэком</li>
+          <li>Сборка фронтенда — <strong>esbuild</strong>-бандл, минифицированный, инлайн в HTML</li>
+        </ul>
+        <div class="callout">У серверной части <b>нет зависимостей времени выполнения</b> — всё на стандартной библиотеке Node.</div>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 3 -->
+      <section class="sec" id="s3">
+        <div class="sec-head"><span class="sec-num">03</span><h2>Состав index.html — 10 скрипт-блоков</h2></div>
+        <p>В порядке загрузки внутри файла:</p>
+        <ol>
+          <li><strong>DEMO SHIM</strong> — автономный режим: <code>window.storage</code> на in-memory + localStorage, засев демо-профиля.</li>
+          <li><strong>km_goals.js</strong> — слой «важности» целей: считает приоритет из суммы, накопленного, срока и свободного бюджета. Чистая надстройка, в данные ничего не пишет.</li>
+          <li><strong>km_moto.js</strong> — косметика «Мотоцикл»: SVG-группы в системе координат маскота (<code>viewBox="0 0 200 200"</code>), два слоя — за и перед бегемотиком.</li>
+          <li><strong>km_server_shim.js</strong> — реализация <code>window.storage</code> поверх REST (<code>/api/kv</code>); <code>km:session</code> всегда локально в браузере.</li>
+          <li><strong>STANDALONE DEMO</strong> — переопределяет <code>window.storage</code> обратно на localStorage, <strong>перехватывает <code>window.fetch</code> и гасит запросы к Anthropic</strong>, засевает демо-аккаунт с высоким индексом.</li>
+          <li><strong>km_debt.js</strong> — «Разбор долгов» + калькулятор досрочного погашения; карточка во вкладке «Светофор». Считает кредиты даже без указанного остатка.</li>
+          <li><strong>km_invest.js</strong> — «Изобилие»: при высоком индексе и собранной подушке будит «спящие» накопления. Арифметика в <code>window.KmInvest</code>.</li>
+          <li><strong>km_pace.js</strong> — «Темп целей»: реалистичность целей, сколько откладывать в месяц. Арифметика в <code>window.KmPace</code>.</li>
+          <li><strong>km_check.js</strong> — кнопка «🧾 Чек» (ввод траты текст/фото/голос) + раздел «Мои чеки». Монтируется прямо в DOM. <em>Именно её плашка давала баг на вкладке «Мотик».</em></li>
+          <li><strong>React-бандл</strong> — само приложение (esbuild, ≈333 КБ из ≈516 КБ файла).</li>
+        </ol>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 4 -->
+      <section class="sec" id="s4">
+        <div class="sec-head"><span class="sec-num">04</span><h2>Слой хранения window.storage</h2></div>
+        <p>Единый асинхронный интерфейс (все методы возвращают Promise): <code>get(key)</code>, <code>set(key,value)</code>, <code>delete(key)</code>, <code>list(prefix)</code>. Ключи:</p>
+        <table class="kv">
+          <tr><td>km:session</td><td>Текущий вход. <strong>Всегда локально в браузере</strong> — чтобы в серверном режиме один вход не перелогинивал остальных.</td></tr>
+          <tr><td>km:users</td><td>Список аккаунтов. В серверном режиме общий, при записи <strong>мержится</strong>.</td></tr>
+          <tr><td>km:user:&lt;логин&gt;</td><td>Весь стейт пользователя одним JSON-объектом.</td></tr>
+        </table>
+        <p>Две взаимозаменяемые реализации: localStorage (статика) и REST-обёртка над <code>/api/kv</code> (сервер). <strong>Базы данных в браузере нет</strong> (sql.js/wasm не используется).</p>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 5 -->
+      <section class="sec" id="s5">
+        <div class="sec-head"><span class="sec-num">05</span><h2>Бэкенд server.js</h2></div>
+        <p>Чистый Node без внешних зависимостей. Эндпоинты:</p>
+        <table class="kv">
+          <tr><td>GET /healthz</td><td>Статус + имя драйвера БД.</td></tr>
+          <tr><td>GET /api/kv?key=</td><td>Чтение значения.</td></tr>
+          <tr><td>POST /api/kv</td><td>Запись <code>{key,value}</code> (тело до 5 МБ; ключ/значение строго строки).</td></tr>
+          <tr><td>DELETE /api/kv?key=</td><td>Удаление; для пользовательского ключа — транзакционная чистка по всем таблицам.</td></tr>
+          <tr><td>GET /api/kv-list?prefix=</td><td>Список ключей.</td></tr>
+          <tr><td>* (остальное)</td><td>Статика из <code>public/</code> с SPA-фолбэком на index.html и защитой от path traversal.</td></tr>
+        </table>
+        <p>Драйвер БД выбирается автоматически: есть <code>better-sqlite3</code> — он, иначе встроенный <code>node:sqlite</code>. На старте: <code>PRAGMA journal_mode=WAL</code>, <code>foreign_keys=ON</code>, идемпотентная схема (<code>CREATE TABLE IF NOT EXISTS</code>). Переменные окружения: <code>PORT</code> (3000), <code>HOST</code> (<code>0.0.0.0</code>), <code>KM_DB</code> (путь к файлу БД).</p>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 6 -->
+      <section class="sec" id="s6">
+        <div class="sec-head"><span class="sec-num">06</span><h2>db_adapter.js — мост «состояние ↔ SQL»</h2></div>
+        <p>Драйвер-агностичный (работает с любым, у кого есть <code>prepare().get/all/run</code> и <code>exec</code>). Две функции:</p>
+        <ul>
+          <li><code>loadData(db, userId)</code> — собирает плоское состояние приложения из всех таблиц в тот же объект <code>data</code>, что использует фронтенд (переименование колонок через SQL-алиасы: <code>monthly_payment AS monthly</code> и т.п.).</li>
+          <li><code>saveData(db, data, userId)</code> — сохраняет одной транзакцией (<code>BEGIN/COMMIT</code>, при ошибке <code>ROLLBACK</code>): профиль через <code>UPSERT</code>, а коллекции (долги, цели, чек-ины, чеки, челленджи, уроки) — «удалить всё по <code>user_id</code> и вставить заново».</li>
+        </ul>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 7 -->
+      <section class="sec" id="s7">
+        <div class="sec-head"><span class="sec-num">07</span><h2>Схема базы данных</h2></div>
+        <p>Реляционная, корректный мультиюзер: у коллекций составной <code>PRIMARY KEY (user_id, id)</code> и индексы по <code>user_id</code>.</p>
+        <table class="kv">
+          <tr><td>financial_profiles</td><td>Доход, обязательные траты, платежи по кредитам, накопления, стабильность дохода, импульсивность, разбивка быта, флаг онбординга.</td></tr>
+          <tr><td>debts</td><td>Долги: платёж, остаток, ставка.</td></tr>
+          <tr><td>goals</td><td>Цели: сумма, срок (мес.), накоплено, статус.</td></tr>
+          <tr><td>purchase_plans</td><td>Планы покупок для «Светофора»: цена, тип оплаты, платёж, ставка, срок, активность.</td></tr>
+          <tr><td>user_progress</td><td>XP, уровень, серии (в т.ч. «чистая» без импульсов).</td></tr>
+          <tr><td>user_cosmetics</td><td>Палитра, шапка, аксессуар маскота.</td></tr>
+          <tr><td>user_settings</td><td>Напоминания и UI-флаги.</td></tr>
+          <tr><td>checkins</td><td>Ежедневные чек-ины с метриками (балл, ПДН, свободный остаток, подушка).</td></tr>
+          <tr><td>user_lessons</td><td>Обучающие уроки.</td></tr>
+          <tr><td>user_challenges</td><td>Челленджи.</td></tr>
+          <tr><td>expenses</td><td>Чеки/траты: сумма, заметка, категория, эмодзи, источник (text/photo/voice).</td></tr>
+          <tr><td>app_kv</td><td>Универсальное KV для непользовательских ключей (km:users и пр.) — весь стейт в одном .sqlite.</td></tr>
+        </table>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 8 -->
+      <section class="sec" id="s8">
+        <div class="sec-head"><span class="sec-num">08</span><h2>Модель мультиюзера</h2></div>
+        <ul>
+          <li>Имя пользователя → <code>user_id</code> как <code>u_&lt;имя&gt;</code> (<code>demo</code> → <code>u_demo</code>).</li>
+          <li>Сессия локальна у каждого посетителя; список аккаунтов общий и <strong>мержится</strong> при записи — одновременные регистрации не затирают друг друга.</li>
+          <li>Удаление аккаунта чистит все таблицы пользователя в одной транзакции.</li>
+        </ul>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 9 -->
+      <section class="sec" id="s9">
+        <div class="sec-head"><span class="sec-num">09</span><h2>Плагины и «переживание» ре-рендеров React</h2></div>
+        <p>Плагины km_debt / km_invest / km_pace / km_check вживляют свой UI прямо в DOM-узел <code>.km-page</code>, который контролирует React. Чтобы элементы не «слетали» при перерисовке, используется периодический <code>tick()</code> (через <code>setInterval</code>): он сверяет активную вкладку и синхронизирует/удаляет вставленные узлы. Бизнес-арифметика вынесена в глобальные объекты (<code>window.KmInvest</code>, <code>window.KmPace</code>) и тестируется отдельно от UI.</p>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 10 -->
+      <section class="sec" id="s10">
+        <div class="sec-head"><span class="sec-num">10</span><h2>Финансовый индекс (алгоритм)</h2></div>
+        <p>Балл 0–100 (<code>pl()</code> в бандле, копия — <code>km_invest.indexScore()</code>), измеряет защищённость и безопасность долга:</p>
+        <ul>
+          <li><strong>Устойчивость (вес 70%)</strong> — денежный поток (доля свободных денег от дохода, максимум при профиците ≈25%) + запас прочности (на сколько месяцев обязательных трат хватит накоплений относительно цели 3/4/6 мес. по стабильности дохода). При высоком доходе подушка перестаёт быть обязательной — доход её замещает.</li>
+          <li><strong>Безопасность долга (вес 30%)</strong> — ПДН (подъёмность платежей) и общая долговая нагрузка к годовому доходу (ощутимо после ≈2 годовых доходов).</li>
+          <li>Стабильность дохода и дисциплина трат — мягкие поправки, гаснут с ростом устойчивости. Если остаток по кредиту не указан, он оценивается по платежу (≈18 платежей).</li>
+        </ul>
+        <div class="callout">Балл <b>монотонен</b>: рост дохода и накоплений его не понижает, рост трат и долга — не повышает. «Упитанность» маскота привязана к индексу (<code>weight: Vo(score)</code>).</div>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 11 -->
+      <section class="sec" id="s11">
+        <div class="sec-head"><span class="sec-num">11</span><h2>AI-коуч и фолбэк</h2></div>
+        <p>Советы запрашиваются у Anthropic Messages API (<code>claude-sonnet-4-20250514</code>) запросом <code>POST https://api.anthropic.com/v1/messages</code>. Важно:</p>
+        <ul>
+          <li><strong>Ключа в коде нет</strong> (заголовка <code>x-api-key</code> нет) — вызов рассчитан на среду, где ключ подставляется платформой.</li>
+          <li>В клиентской сборке (<code>index.html</code>) <code>window.fetch</code> перехватывается и запрос к Anthropic <strong>намеренно отклоняется</strong> → показывается <strong>встроенный локальный диагноз</strong> (детерминированный расчёт по индексу). Размещённый сайт работает полностью офлайн (кроме шрифтов Google Fonts).</li>
+          <li>Чтобы включить «живого» коуча на проде — нужен серверный прокси, добавляющий ключ (напрямую из браузера нельзя: ключ и CORS).</li>
+        </ul>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 12 -->
+      <section class="sec" id="s12">
+        <div class="sec-head"><span class="sec-num">12</span><h2>Три HTML-сборки в архиве</h2></div>
+        <table class="kv">
+          <tr><td>index.html</td><td>Клиентская сборка (localStorage, Anthropic-вызов погашен). <strong>Содержит фикс</strong> плашки чеков. Точка входа сайта.</td></tr>
+          <tr><td>standalone.html</td><td>Та же клиентская сборка, но <strong>без фикса</strong> (более ранняя).</td></tr>
+          <tr><td>demo.html</td><td>Сборка с активным серверным REST-шимом (без localStorage-оверрайда), под <code>server.js</code>.</td></tr>
+        </table>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 13 -->
+      <section class="sec" id="s13">
+        <div class="sec-head"><span class="sec-num">13</span><h2>Зависимости и требования</h2></div>
+        <ul>
+          <li><strong>Статический хостинг:</strong> ничего не нужно — любой веб-сервер, отдающий файлы. Единственная внешняя загрузка — шрифты Google Fonts по https (есть фолбэк на системные).</li>
+          <li><strong>Серверный режим:</strong> только Node.js ≥ 22.5. <code>better-sqlite3</code> опционален (скорость + убрать пометку «experimental»). База — один файл <code>kopimotik.sqlite</code> (WAL; бэкап = копия файла).</li>
+        </ul>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 14 -->
+      <section class="sec" id="s14">
+        <div class="sec-head"><span class="sec-num">14</span><h2>Безопасность</h2></div>
+        <p>Это демонстрационное/дружеское приложение, не банковский уровень:</p>
+        <ul>
+          <li>Пароли хешируются <strong>некриптостойким</strong> собственным алгоритмом и лежат в общем <code>km:users</code>.</li>
+          <li>В серверном режиме <strong>нет HTTPS и нет защиты от перебора</strong>; по умолчанию слушается вся сеть (<code>0.0.0.0</code>).</li>
+        </ul>
+        <div class="callout warn"><b>Рекомендации для прод/интернета:</b> держать в доверенной LAN; для интернета — обратный прокси (nginx/Caddy) с HTTPS и доп. аутентификацией, либо туннель (Cloudflare Tunnel / Tailscale); <code>HOST=127.0.0.1</code>, чтобы не пускать сеть.</div>
+        <p>Плюсы текущей реализации: REST ограничивает тело 5 МБ, статика защищена от path traversal, запись идёт транзакциями.</p>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 15 -->
+      <section class="sec" id="s15">
+        <div class="sec-head"><span class="sec-num">15</span><h2>Состав архива (плоская структура для хостинга)</h2></div>
+        <p><code>index.html</code> (точка входа), <code>standalone.html</code>, <code>demo.html</code>, <code>server.js</code>, <code>db_adapter.js</code>, <code>schema.sql</code>, <code>package.json</code>, <code>km_invest.standalone.js</code>, <code>km_debt.standalone.js</code>, <code>km_pace.standalone.js</code>, <code>README.md</code>.</p>
+        <div class="callout warn"><b>Примечание:</b> <code>server.js</code> раздавал статику из <code>public/</code>, которой больше нет — для серверного режима путь нужно поправить или вернуть HTML в <code>public/</code>.</div>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+      <!-- 16 -->
+      <section class="sec" id="s16">
+        <div class="sec-head"><span class="sec-num">16</span><h2>Исправленный баг</h2></div>
+        <p>Плашка «Мои чеки» мелькала вверху вкладки «Мотик». <strong>Причина:</strong> orphan-узел km_check находится вне дерева React; при переключении вкладок React репарентил его наверх <code>.km-page</code>, а следующий <code>tick()</code> убирал — отсюда «мелькание». <strong>Фикс:</strong> синхронное удаление узла в capture-фазе клика по вкладке — до того, как React перерисует страницу.</p>
+        <a class="totop" href="#top">↑ наверх</a>
+      </section>
+
+    </main>
+  </div>
+</div>
+
+<footer>
+  <div class="wrap">
+    <span class="mono">КопиМотик · техническое описание</span>
+    <span class="mono">React 18.3.1 · Node ≥ 22.5 · SQLite</span>
+  </div>
+</footer>
+
+<script>
+(function(){
+  // --- active section highlight ---
+  var links = Array.prototype.slice.call(document.querySelectorAll('#toc a'));
+  var map = {};
+  links.forEach(function(a){ map[a.getAttribute('href').slice(1)] = a; });
+  var secs = Array.prototype.slice.call(document.querySelectorAll('section.sec'));
+
+  var obs = new IntersectionObserver(function(entries){
+    entries.forEach(function(e){
+      if(e.isIntersecting){
+        links.forEach(function(l){ l.classList.remove('active'); });
+        var a = map[e.target.id];
+        if(a){ a.classList.add('active'); }
+      }
+    });
+  }, { rootMargin: '-10% 0px -75% 0px', threshold: 0 });
+  secs.forEach(function(s){ obs.observe(s); });
+
+  // --- TOC search filter ---
+  var input = document.getElementById('tocSearch');
+  var items = Array.prototype.slice.call(document.querySelectorAll('#toc li'));
+  input.addEventListener('input', function(){
+    var q = input.value.trim().toLowerCase();
+    items.forEach(function(li){
+      var txt = li.textContent.toLowerCase();
+      li.classList.toggle('hide', q !== '' && txt.indexOf(q) === -1);
+    });
+  });
+
+  // --- mobile TOC toggle ---
+  var toggle = document.getElementById('tocToggle');
+  var rail = document.getElementById('rail');
+  toggle.addEventListener('click', function(){ rail.classList.toggle('open'); });
+  rail.addEventListener('click', function(e){
+    if(e.target.closest('a') && window.matchMedia('(max-width:880px)').matches){
+      rail.classList.remove('open');
+    }
+  });
+})();
+</script>
+</body>
+</html>
